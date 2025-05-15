@@ -72,7 +72,7 @@ function changeOpacity(mesh, value)
         changeOpacity(mesh.children[i], value);
 }
 
-function fixMaterial(model, cast, receive)
+function fixModel(model, cast, receive)
 {
     if (!model)
         return;
@@ -88,12 +88,13 @@ function fixMaterial(model, cast, receive)
     {
         model.geometry.computeVertexNormals();
         model.geometry.boundingBox.expandByObject(model);
-        model.geometry.boundingSphere.radius = model.geometry.boundingBox.getSize(new THREE.Vector3()) * 1.5;
+        model.geometry.computeBoundingBox();
+        model.geometry.computeBoundingSphere();
     }
     if (model.isLight)
         model.visible = false;
     for (var i = 0; i < model.children.length; i++)
-        fixMaterial(model.children[i], cast, receive);
+        fixModel(model.children[i], cast, receive);
 }
 
 function hasSkinnedChildren(mesh)
@@ -129,7 +130,7 @@ RPM.Manager.Plugins.registerCommand(pluginName, "Load model", (id, filename) =>
                 const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
                 model.position.set(0, size.y * 0.5, 0);
                 model.animations = gltf.animations;
-                fixMaterial(model, true, true);
+                fixModel(model, true, true);
                 if (!!result.object.mesh)
                 {
                     if (!!oldModel)
